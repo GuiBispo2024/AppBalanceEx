@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Simulador de QoS e Multi-Cloud</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  color: #38bdf8;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 10px;
+  width: 220px;
+  border: 2px solid transparent;
+  transition: 0.3s;
+}
+
+.highlight {
+  border: 2px solid #22c55e;
+  transform: scale(1.05);
+}
+
+button {
+  padding: 10px 20px;
+  margin: 15px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #38bdf8;
+  border: none;
+  border-radius: 6px;
+}
+
+select {
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.log {
+  background: #020617;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 8px;
+  text-align: left;
+  max-width: 700px;
+  margin-inline: auto;
+  font-size: 14px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>🌐 Simulador de Rede Inteligente</h1>
+
+<p>
+Simula como sistemas modernos escolhem o melhor servidor usando <b>QoS</b>, <b>Load Balancing</b> e <b>Edge Computing</b>.
+</p>
+
+<label>Tipo de requisição:</label>
+<select id="tipo">
+  <option value="video">🎥 Vídeo (alta prioridade)</option>
+  <option value="api">🔗 API (média prioridade)</option>
+  <option value="download">⬇️ Download (baixa prioridade)</option>
+</select>
+
+<br>
+
+<button onclick="fazerRequisicao()">Fazer Requisição</button>
+
+<h2>🖥️ Servidores</h2>
+<div class="container" id="servidores"></div>
+
+<h2>📊 Resultado</h2>
+<div id="resultado"></div>
+
+<h2>🧠 O que o sistema está fazendo?</h2>
+<div class="log" id="log"></div>
+
+<script>
+const servidores = [
+  { nome: "Edge - São Paulo", latenciaBase: 20, carga: 0 },
+  { nome: "AWS - Brasil", latenciaBase: 50, carga: 0 },
+  { nome: "Azure - EUA", latenciaBase: 120, carga: 0 }
+];
+
+function atualizarServidores(escolhidoNome = "") {
+  const container = document.getElementById("servidores");
+  container.innerHTML = "";
+
+  servidores.forEach(s => {
+    const destaque = s.nome === escolhidoNome ? "highlight" : "";
+
+    container.innerHTML += `
+      <div class="card ${destaque}">
+        <h3>${s.nome}</h3>
+        Latência Base: ${s.latenciaBase} ms<br>
+        Carga: ${s.carga}
+      </div>
+    `;
+  });
+}
+
+function calcularLatencia(servidor) {
+  return servidor.latenciaBase + (servidor.carga * 15);
+}
+
+function fazerRequisicao() {
+  const tipo = document.getElementById("tipo").value;
+
+  let pesoPrioridade = {
+    video: 0.5,
+    api: 1,
+    download: 1.5
+  };
+
+  let logTexto = `➡️ Nova requisição: ${tipo.toUpperCase()}<br><br>`;
+
+  // simula carga
+  servidores.forEach(s => {
+    s.carga = Math.floor(Math.random() * 5);
+  });
+
+  let melhor = null;
+  let melhorLat = Infinity;
+
+  servidores.forEach(s => {
+    let lat = calcularLatencia(s);
+    let latFinal = lat * pesoPrioridade[tipo];
+
+    logTexto += `🔹 ${s.nome}<br>`;
+    logTexto += `Latência base: ${s.latenciaBase} ms<br>`;
+    logTexto += `Carga: ${s.carga}<br>`;
+    logTexto += `Latência calculada: ${lat} ms<br>`;
+    logTexto += `Após QoS: ${latFinal.toFixed(1)} ms<br><br>`;
+
+    if (latFinal < melhorLat) {
+      melhorLat = latFinal;
+      melhor = s;
+    }
+  });
+
+  melhor.carga++;
+
+  document.getElementById("resultado").innerHTML = `
+    <div class="card highlight">
+      ✅ <strong>Servidor escolhido:</strong><br>${melhor.nome}<br><br>
+      ⚡ <strong>Latência final:</strong> ${melhorLat.toFixed(1)} ms
+    </div>
+  `;
+
+  logTexto += `✅ Servidor escolhido: ${melhor.nome}`;
+
+  document.getElementById("log").innerHTML = logTexto;
+
+  atualizarServidores(melhor.nome);
+}
+
+// inicial
+atualizarServidores();
+</script>
+
+</body>
+</html>
